@@ -128,7 +128,7 @@ function Navbar() {
           className="theme-toggle"
           onClick={toggleTheme}
         >
-          {dark ? <SunIcon /> : <MoonIcon />}
+          <SunIcon />
         </button>
 
       </div>
