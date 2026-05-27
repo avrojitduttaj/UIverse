@@ -77,6 +77,8 @@ function Components() {
   const [activeSection, setActiveSection] = useState('buttons')
   const [copied, setCopied] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  // Mobile sidebar drawer state
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   
   // Refs for scrolling
   const buttonsRef = useRef(null)
@@ -185,45 +187,75 @@ function Components() {
       <div className="comp-layout">
 
         {/* ================= SIDEBAR ================= */}
-        <aside className="comp-sidebar">
-          <p className="sidebar-label">ON THIS PAGE</p>
-
-          {sections.map((s) => {
-            // Only show section in sidebar if it has content when searching
-            if (searchQuery.trim()) {
-              if (s.id === 'all-components' && filteredComponents.length === 0) return null
-              if (s.componentName && !shouldShowSection(s.id, s.componentName)) return null
-            }
-            
-            return (
-              <button
-                key={s.id}
-                className={`sidebar-item ${activeSection === s.id ? "sidebar-item--active" : ""}`}
-                onClick={() => scrollTo(s.id)}
-              >
-                <span className="sidebar-item-icon">{s.icon}</span>
-                {s.label}
-              </button>
-            )
-          })}
-
-          <div className="sidebar-divider" />
-
-          <p className="sidebar-label">CONTRIBUTE</p>
-
-          <a
-            href="https://github.com/ayushkashyap402/UIverse"
-            target="_blank"
-            rel="noreferrer"
-            className="sidebar-item sidebar-item--link"
+        <aside className={`comp-sidebar comp-sidebar--mobile ${sidebarOpen ? 'comp-sidebar--open' : ''}`}>
+          {/* Mobile toggle — hidden on desktop */}
+          <button
+            type="button"
+            className="sidebar-mobile-toggle"
+            aria-expanded={sidebarOpen}
+            aria-controls="comp-sidebar-drawer"
+            onClick={() => setSidebarOpen((o) => !o)}
+            id="sidebar-toggle-btn"
           >
-            <span className="sidebar-item-icon">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-              </svg>
+            <span className="sidebar-mobile-toggle-text">
+              <span className="sidebar-mobile-toggle-eyebrow">Navigate</span>
+              <span className="sidebar-mobile-toggle-current">
+                {sections.find((s) => s.id === activeSection)?.label ?? 'Components'}
+              </span>
             </span>
-            GitHub Repo
-          </a>
+            <span
+              className={`sidebar-mobile-caret ${sidebarOpen ? 'sidebar-mobile-caret--open' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
+
+          {/* Drawer content — always visible on desktop, toggleable on mobile */}
+          <div
+            id="comp-sidebar-drawer"
+            className={`sidebar-drawer ${sidebarOpen ? 'sidebar-drawer--open' : ''}`}
+          >
+            <p className="sidebar-label">ON THIS PAGE</p>
+
+            {sections.map((s) => {
+              // Only show section in sidebar if it has content when searching
+              if (searchQuery.trim()) {
+                if (s.id === 'all-components' && filteredComponents.length === 0) return null
+                if (s.componentName && !shouldShowSection(s.id, s.componentName)) return null
+              }
+              
+              return (
+                <button
+                  key={s.id}
+                  className={`sidebar-item ${activeSection === s.id ? "sidebar-item--active" : ""}`}
+                  onClick={() => {
+                    scrollTo(s.id)
+                    setSidebarOpen(false)
+                  }}
+                >
+                  <span className="sidebar-item-icon">{s.icon}</span>
+                  {s.label}
+                </button>
+              )
+            })}
+
+            <div className="sidebar-divider" />
+
+            <p className="sidebar-label">CONTRIBUTE</p>
+
+            <a
+              href="https://github.com/ayushkashyap402/UIverse"
+              target="_blank"
+              rel="noreferrer"
+              className="sidebar-item sidebar-item--link"
+            >
+              <span className="sidebar-item-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+              </span>
+              GitHub Repo
+            </a>
+          </div>
         </aside>
 
         {/* ================= MAIN ================= */}
