@@ -221,7 +221,7 @@ const testimonials = [
 
       {/* ── Testimonials ── */}
       <section className="testimonial-section">
-        <h2 className="section-heading">Testimonial Marquee</h2>
+        <h2 className="section-heading">Testimonials</h2>
         <p className="section-subheading">Know what people think and feel about UIverse</p>
         <div className="testimonial-container">
           {[...testimonials, ...testimonials].map((item, index) => (
