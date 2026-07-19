@@ -82,27 +82,6 @@ const sections = [
     ),
   },
   {
-    id: 'input',
-    label: 'Input',
-    componentName: 'Input',
-    icon: (
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="6" width="18" height="12" rx="2" />
-        <path d="M8 12h5" />
-        <path d="M13 10v4" />
-      </svg>
-    ),
-  },
-  {
     id: 'all-components',
     label: 'All Components',
     componentName: null,
@@ -152,7 +131,7 @@ const CheckIcon = () => (
 
 function Components() {
   const [activeSection, setActiveSection] = useState('buttons')
-  const [copied, setCopied] = useState(false)
+  const [showToast, setShowToast] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   // Mobile sidebar drawer state
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -165,10 +144,24 @@ function Components() {
   const inputRef = useRef(null)
   const allComponentsRef = useRef(null)
 
-  const handleCopy = (code) => {
-    navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1800)
+  const toastTimeout = useRef(null)
+
+  const handleCopy = async (code) => {
+    try {
+      await navigator.clipboard.writeText(code)
+
+      setShowToast(true)
+
+      if (toastTimeout.current) {
+        clearTimeout(toastTimeout.current)
+      }
+
+      toastTimeout.current = setTimeout(() => {
+        setShowToast(false)
+      }, 3000)
+    } catch (error) {
+      console.error('Copy failed:', error)
+    }
   }
 
   const scrollTo = (id) => {
@@ -256,11 +249,21 @@ function Components() {
         filteredComponents.some((c) => c.name === 'Inputs')
       ) {
         scrollTo('inputs')
+      } else if (searchLower.includes('tab') || filteredComponents.some((c) => c.name === 'Tabs')) {
+        scrollTo('tabs')
       } else if (filteredComponents.length > 0) {
         scrollTo('all-components')
       }
     }
   }, [searchQuery])
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeout.current) {
+        clearTimeout(toastTimeout.current)
+      }
+    }
+  }, [])
 
   // Clear search function
   const clearSearch = () => {
@@ -282,6 +285,8 @@ function Components() {
   return (
     <div className="comp-page">
       <Navbar />
+
+      {showToast && <div className="copy-toast">Code copied successfully!</div>}
 
       <div className="comp-layout">
         {/* ================= SIDEBAR ================= */}
@@ -429,15 +434,9 @@ function Components() {
                     className="copy-btn"
                     onClick={() => handleCopy(`<Button text="Primary" variant="primary" />`)}
                   >
-                    {copied ? (
-                      <>
-                        <CheckIcon /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <CopyIcon /> Copy
-                      </>
-                    )}
+                    <>
+                      <CopyIcon /> Copy
+                    </>
                   </button>
                 </div>
 
@@ -471,15 +470,9 @@ function Components() {
                     className="copy-btn"
                     onClick={() => handleCopy(`<Badge text="Primary" variant="primary" />`)}
                   >
-                    {copied ? (
-                      <>
-                        <CheckIcon /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <CopyIcon /> Copy
-                      </>
-                    )}
+                    <>
+                      <CopyIcon /> Copy
+                    </>
                   </button>
                 </div>
 
@@ -526,7 +519,7 @@ function Components() {
 <Alert type="info" message="Closable alert example." closable />`)
                     }
                   >
-                    {copied ? '✅ Copied!' : '📋 Copy'}
+                    📋 Copy
                   </button>
                 </div>
                 <pre>{`<Alert type="success" message="Action completed successfully!" />
@@ -714,15 +707,9 @@ function Components() {
 </Tabs>`)
                     }
                   >
-                    {copied ? (
-                      <>
-                        <CheckIcon /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <CopyIcon /> Copy
-                      </>
-                    )}
+                    <>
+                      <CopyIcon /> Copy
+                    </>
                   </button>
                 </div>
                 <pre>{`<Tabs defaultValue="tab1">
@@ -1143,6 +1130,13 @@ function Components() {
                         <td>string</td>
                         <td>-</td>
                         <td>Unique identifier used to associate the label with the input.</td>
+                        <td>string</td>
+                        <td>
+                          <code>"underline"</code>
+                        </td>
+                        <td>
+                          Visual style: <code>"underline"</code> or <code>"pills"</code>.
+                        </td>
                       </tr>
                     </tbody>
                   </table>
